@@ -11,4 +11,11 @@
 
 ## 資料
 
-TBD
+### Plotly
+
+見出し|nbviewer|Colab
+---|---|---
+Plotly Express | [![](https://img.shields.io/badge/render-nbviewer-orange.svg)](https://nbviewer.jupyter.org/github/plotly-dash-book/events/blob/main/20201205/plotly/plotly_express.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/plotly-dash-book/events/blob/main/20201205/plotly/plotly_express.ipynb)
+Plotly Express 演習問題 | [![](https://img.shields.io/badge/render-nbviewer-orange.svg)](https://nbviewer.jupyter.org/github/plotly-dash-book/events/blob/main/20201205/plotly/exercise_plotly_express.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/plotly-dash-book/events/blob/main/20201205/plotly/exercise_plotly_express.ipynb)
+plotly.py | [![](https://img.shields.io/badge/render-nbviewer-orange.svg)](https://nbviewer.jupyter.org/github/plotly-dash-book/events/blob/main/20201205/plotly/plotly.py.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/plotly-dash-book/events/blob/main/20201205/plotly/plotly.py.ipynb)
+plotly.py 演習問題 | [![](https://img.shields.io/badge/render-nbviewer-orange.svg)](https://nbviewer.jupyter.org/github/plotly-dash-book/events/blob/main/20201205/plotly/exercise_plotly.py.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/plotly-dash-book/events/blob/main/20201205/plotly/exercise_plotly.py.ipynb)
