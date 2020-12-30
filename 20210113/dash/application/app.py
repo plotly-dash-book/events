@@ -1,0 +1,296 @@
+import json
+
+import dash
+import dash_core_components as dcc
+import dash_html_components as html
+from dash.dependencies import Input, Output
+
+import plotly.express as px
+import pandas as pd
+
+## DATA FROM https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_time_series
+
+
+data_urls = {
+    "cases": "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv",
+    "death": "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv",
+    "recovery": "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv",
+}
+
+
+def _read_and_melt(url):
+    df = pd.read_csv(url).drop("Province/State", axis=1)
+    df = df.melt(id_vars=["Country/Region", "Lat", "Long"])
+    df["variable"] = pd.to_datetime(df["variable"])
+    return df
+
+
+def _update_data(df):
+    data = pd.DataFrame()
+    for country in df["Country/Region"].unique():
+        df_country = df[df["Country/Region"] == country].copy().reset_index(drop=True)
+        first_value = df_country["value"][0]
+        counts_list = list(df_country["value"].diff().values)
+        counts_list[0] = first_value
+        df_country["counts"] = counts_list
+        data = pd.concat([data, df_country])
+    return data
+
+
+def read_john_data(url):
+    df = _read_and_melt(url)
+    df = _update_data(df)
+    return df
+
+
+def _mapdata_to_weekly(df):
+    df = df.set_index("variable")
+    df = df.resample("W").last()
+    df = df.drop("counts", axis=1)
+    df = df.reset_index()
+    df["variable"] = df["variable"].astype("str")
+    return df
+
+
+def mapdata(df):
+    data = pd.DataFrame()
+    for country in df["Country/Region"].unique():
+        country_df = df[df["Country/Region"] == country]
+        country_df = _mapdata_to_weekly(country_df)
+        data = pd.concat([data, country_df])
+    return data
+
+
+cases = read_john_data(data_urls["cases"])
+death = read_john_data(data_urls["death"])
+recovery = read_john_data(data_urls["recovery"])
+cases_map = mapdata(cases)
+death_map = mapdata(death)
+recovery_map = mapdata(recovery)
+
+mapbox = ''
+px.set_mapbox_access_token(mapbox)
+
+external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
+
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+
+
+app.layout = html.Div(
+    [
+        html.Div(
+            [
+                html.H1("COVID-19 Time series Data"),
+                html.P(
+                    "Data from Johns Hopkins University: ", style={"fontSize": "2.5rem"}
+                ),
+                html.A(
+                    "https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_time_series",
+                    href="https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_time_series",
+                ),
+            ],
+            style={"marginBottom": "2%"},
+        ),
+        html.Div(
+            [
+                html.H3("国ごとのデータ"),
+                html.Div(
+                    [
+                        dcc.Dropdown(
+                            id="drop1",
+                            options=[
+                                {"label": i, "value": i}
+                                for i in ["感染者数", "死亡者数", "回復者数"]
+                            ],
+                            value="感染者数",
+                        ),
+                        dcc.Dropdown(
+                            id="drop2",
+                            options=[
+                                {"label": i, "value": i}
+                                for i in cases["Country/Region"].unique()
+                            ],
+                            value=["Japan"],
+                            multi=True,
+                        ),
+                        dcc.RadioItems(
+                            id="graph_radio",
+                            options=[{"label": s, "value": s} for s in ["新規", "累計"]],
+                            value="新規",
+                        ),
+                    ]
+                ),
+                dcc.Graph(id="first_graph"),
+                dcc.Graph(id="map_graph"),
+                dcc.Graph(id="callback_graph"),
+                html.H1(id="test"),
+            ]
+        ),
+    ],
+    style={"padding": "5%"},
+)
+
+
+@app.callback(
+    Output("first_graph", "figure"),
+    Output("map_graph", "figure"),
+    Input("drop1", "value"),
+    Input("drop2", "value"),
+    Input("graph_radio", "value"),
+)
+def update_graph(type_select, cnt_select, graph_select):
+    if type_select == "死亡者数":
+        death_data = death[death["Country/Region"].isin(cnt_select)]
+        if graph_select == "新規":
+            return (
+                px.line(death_data, x="variable", y="counts", color="Country/Region"),
+                px.scatter_mapbox(
+                    death_map,
+                    lat="Lat",
+                    lon="Long",
+                    size="value",
+                    animation_frame="variable",
+                    color="value",
+                    hover_name="Country/Region",
+                    zoom=1,
+                    size_max=60,
+                    color_continuous_scale=px.colors.cyclical.IceFire,
+                    height=600,
+                    title=f"マップ表示(累計値: {type_select})",
+                    template={"layout": {"clickmode": "event+select"}},
+                ),
+            )
+        else:
+            return (
+                px.line(death_data, x="variable", y="value", color="Country/Region"),
+                px.scatter_mapbox(
+                    death_map,
+                    lat="Lat",
+                    lon="Long",
+                    size="value",
+                    animation_frame="variable",
+                    color="value",
+                    hover_name="Country/Region",
+                    zoom=1,
+                    size_max=60,
+                    color_continuous_scale=px.colors.cyclical.IceFire,
+                    height=600,
+                    title=f"マップ表示(累計値: {type_select})",
+                    template={"layout": {"clickmode": "event+select"}},
+                ),
+            )
+    elif type_select == "回復者数":
+        recovery_data = recovery[recovery["Country/Region"].isin(cnt_select)]
+        if graph_select == "新規":
+            return (
+                px.line(
+                    recovery_data, x="variable", y="counts", color="Country/Region"
+                ),
+                px.scatter_mapbox(
+                    recovery_map,
+                    lat="Lat",
+                    lon="Long",
+                    size="value",
+                    animation_frame="variable",
+                    color="value",
+                    hover_name="Country/Region",
+                    zoom=1,
+                    size_max=60,
+                    color_continuous_scale=px.colors.cyclical.IceFire,
+                    height=600,
+                    title=f"マップ表示(累計値: {type_select})",
+                    template={"layout": {"clickmode": "event+select"}},
+                ),
+            )
+        else:
+            return (
+                px.line(recovery_data, x="variable", y="value", color="Country/Region"),
+                px.scatter_mapbox(
+                    recovery_map,
+                    lat="Lat",
+                    lon="Long",
+                    size="value",
+                    animation_frame="variable",
+                    color="value",
+                    hover_name="Country/Region",
+                    zoom=1,
+                    size_max=60,
+                    color_continuous_scale=px.colors.cyclical.IceFire,
+                    height=600,
+                    title=f"マップ表示(累計値: {type_select})",
+                    template={"layout": {"clickmode": "event+select"}},
+                ),
+            )
+    else:
+        cases_data = cases[cases["Country/Region"].isin(cnt_select)]
+        if graph_select == "新規":
+            return (
+                px.line(cases_data, x="variable", y="counts", color="Country/Region"),
+                px.scatter_mapbox(
+                    cases_map,
+                    lat="Lat",
+                    lon="Long",
+                    size="value",
+                    animation_frame="variable",
+                    color="value",
+                    hover_name="Country/Region",
+                    zoom=1,
+                    size_max=60,
+                    color_continuous_scale=px.colors.cyclical.IceFire,
+                    height=600,
+                    title=f"マップ表示(累計値: {type_select})",
+                    template={"layout": {"clickmode": "event+select"}},
+                ),
+            )
+        else:
+            return (
+                px.line(cases_data, x="variable", y="value", color="Country/Region"),
+                px.scatter_mapbox(
+                    cases_map,
+                    lat="Lat",
+                    lon="Long",
+                    size="value",
+                    animation_frame="variable",
+                    color="value",
+                    hover_name="Country/Region",
+                    zoom=1,
+                    size_max=60,
+                    color_continuous_scale=px.colors.cyclical.IceFire,
+                    height=600,
+                    title=f"マップ表示(累計値: {type_select})",
+                    template={"layout": {"clickmode": "event+select"}},
+                ),
+            )
+
+
+@app.callback(
+    Output("callback_graph", "figure"),
+    Input("map_graph", "selectedData"),
+    Input("drop1", "value"),
+)
+def update_graph(selectedData, selected_value):
+    if selectedData is None:
+        selectedData = {"points": [{"hovertext": "Japan"}]}
+    country_list = list()
+    for one_dict in selectedData["points"]:
+        country_list.append(one_dict["hovertext"])
+    if selected_value == "死亡者数":
+        death_df = death[death["Country/Region"].isin(country_list)]
+        return px.line(death_df, x="variable", y="value", color="Country/Region")
+    elif selected_value == "回復者数":
+        recovery_df = recovery[recovery["Country/Region"].isin(country_list)]
+        return px.line(recovery_df, x="variable", y="value", color="Country/Region")
+    else:
+        cases_df = cases[cases["Country/Region"].isin(country_list)]
+        return px.line(cases_df, x="variable", y="value", color="Country/Region")
+
+
+## コメントを動的に出るようにする
+## 選択した国のデータが全て出るようにする
+
+## その下に国ごとのデータをどんどん追加する
+##
+
+
+if __name__ == "__main__":
+    app.run_server(debug=True)
