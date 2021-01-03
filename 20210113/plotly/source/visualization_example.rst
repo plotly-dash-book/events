@@ -15,7 +15,7 @@
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
 
-    df = pd.read_pickle("data.pickle")
+    df = pd.read_pickle("https://github.com/plotly-dash-book/events/raw/plotly/20210113/plotly/data.pickle")
     df.iloc[0].T
 
 感染者の位置情報
