@@ -17,7 +17,7 @@
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
 
-    df = pd.read_pickle("https://github.com/plotly-dash-book/events/raw/plotly/20210113/plotly/data.pickle")
+    df = pd.read_pickle("https://github.com/plotly-dash-book/events/raw/plotly/20210112/plotly/data.pickle")
     age_df = (
         df.groupby(["確定日", "年代"]).size().reset_index().rename({0: "感染者数"}, axis=1)
     )
