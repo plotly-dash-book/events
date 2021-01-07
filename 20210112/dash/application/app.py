@@ -1,4 +1,5 @@
 import json
+import os 
 
 import dash
 import dash_core_components as dcc
@@ -61,9 +62,9 @@ def mapdata(df):
     return data
 
 
-cases = read_john_data(data_urls["cases"])
-death = read_john_data(data_urls["death"])
-recovery = read_john_data(data_urls["recovery"])
+cases = read_john_data('data/cases.csv')
+death = read_john_data('data/death.csv')
+recovery = read_john_data('data/recovery.csv')
 cases_map = mapdata(cases)
 death_map = mapdata(death)
 recovery_map = mapdata(recovery)
@@ -72,13 +73,14 @@ death_map['data_type'] = 'death'
 recovery_map['data_type'] = 'recovery'
 all_data = pd.concat([cases_map, death_map, recovery_map])
 
-mapbox = ''
+mapbox = 'pk.eyJ1IjoibWF6YXJpbW9ubyIsImEiOiJja2piY2wzM3YxcHJ2MzRtdHFzbXU5d3IwIn0.aPLxSg3qgcJZL3RCvEGc3Q'
 px.set_mapbox_access_token(mapbox)
 
 external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
+server = app.server 
 
 app.layout = html.Div(
     [
@@ -93,7 +95,7 @@ app.layout = html.Div(
                     href="https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_time_series",
                 ),
             ],
-            style={"marginBottom": "2%"},
+            style={"marginBottom": "2%", 'backgroundColor': '#5feb4d', 'padding': '3%', 'borderRadius': '20px'},
         ),
         html.Div(
             [
@@ -125,20 +127,20 @@ app.layout = html.Div(
                     ]
                 ),
                 dcc.Graph(id="first_graph"),
-                dcc.Graph(id="map_graph"),
-                dcc.Graph(id="callback_graph"),
+                dcc.Graph(id="map_graph", style={'width': '65%', 'display': 'inline-block'}),
+                dcc.Graph(id="callback_graph", style={'width': '35%', 'display': 'inline-block'}),
                 html.H1(id="test"),
-            ]
+            ], style={"marginBottom": "2%", 'backgroundColor': '#5feb4d', 'padding': '3%', 'borderRadius': '20px'}
         ),
         html.Div([
             html.Div([
-                html.H3('国ごとのデータ'),
-                html.Button(id='push_button', children='PUSHME', n_clicks=0),
+                html.H3('国ごとのデータ（パターン・マッチング・コールバック）'),
+                html.Button(id='junku_button', children='PUSHME', n_clicks=0),
                 html.Div(id='add_layout', children=[]),
             ])
-        ]),
+        ], style={'backgroundColor': '#5feb4d', 'padding': '3%', 'borderRadius': '20px'}),
     ],
-    style={"padding": "5%"},
+    style={"padding": "5%", 'backgroundColor': '#17be06'},
 )
 
 
@@ -166,7 +168,7 @@ def update_graph(type_select, cnt_select, graph_select):
                     zoom=1,
                     size_max=60,
                     color_continuous_scale=px.colors.cyclical.IceFire,
-                    height=600,
+                    height=800,
                     title=f"マップ表示(累計値: {type_select})",
                     template={"layout": {"clickmode": "event+select"}},
                 ),
@@ -185,7 +187,7 @@ def update_graph(type_select, cnt_select, graph_select):
                     zoom=1,
                     size_max=60,
                     color_continuous_scale=px.colors.cyclical.IceFire,
-                    height=600,
+                    height=800,
                     title=f"マップ表示(累計値: {type_select})",
                     template={"layout": {"clickmode": "event+select"}},
                 ),
@@ -208,7 +210,7 @@ def update_graph(type_select, cnt_select, graph_select):
                     zoom=1,
                     size_max=60,
                     color_continuous_scale=px.colors.cyclical.IceFire,
-                    height=600,
+                    height=800,
                     title=f"マップ表示(累計値: {type_select})",
                     template={"layout": {"clickmode": "event+select"}},
                 ),
@@ -227,7 +229,7 @@ def update_graph(type_select, cnt_select, graph_select):
                     zoom=1,
                     size_max=60,
                     color_continuous_scale=px.colors.cyclical.IceFire,
-                    height=600,
+                    height=800,
                     title=f"マップ表示(累計値: {type_select})",
                     template={"layout": {"clickmode": "event+select"}},
                 ),
@@ -248,7 +250,7 @@ def update_graph(type_select, cnt_select, graph_select):
                     zoom=1,
                     size_max=60,
                     color_continuous_scale=px.colors.cyclical.IceFire,
-                    height=600,
+                    height=800,
                     title=f"マップ表示(累計値: {type_select})",
                     template={"layout": {"clickmode": "event+select"}},
                 ),
@@ -267,7 +269,7 @@ def update_graph(type_select, cnt_select, graph_select):
                     zoom=1,
                     size_max=60,
                     color_continuous_scale=px.colors.cyclical.IceFire,
-                    height=600,
+                    height=800,
                     title=f"マップ表示(累計値: {type_select})",
                     template={"layout": {"clickmode": "event+select"}},
                 ),
@@ -287,39 +289,42 @@ def update_graph(selectedData, selected_value):
         country_list.append(one_dict["hovertext"])
     if selected_value == "死亡者数":
         death_df = death[death["Country/Region"].isin(country_list)]
-        return px.line(death_df, x="variable", y="value", color="Country/Region", title=f'選択国の{selected_value}(累計値: SHIFT+クリック)')
+        return px.line(death_df, x="variable", y="value", color="Country/Region", title=f'選択国の{selected_value}(累計値: SHIFT+クリック)', height=800)
     elif selected_value == "回復者数":
         recovery_df = recovery[recovery["Country/Region"].isin(country_list)]
-        return px.line(recovery_df, x="variable", y="value", color="Country/Region", title=f'選択国の{selected_value}(累計値: SHIFT+クリック)')
+        return px.line(recovery_df, x="variable", y="value", color="Country/Region", title=f'選択国の{selected_value}(累計値: SHIFT+クリック)', height=800)
     else:
         cases_df = cases[cases["Country/Region"].isin(country_list)]
-        return px.line(cases_df, x="variable", y="value", color="Country/Region", title=f'選択国の{selected_value}(累計値: SHIFT+クリック)')
+        return px.line(cases_df, x="variable", y="value", color="Country/Region", title=f'選択国の{selected_value}(累計値: SHIFT+クリック)', height=800)
 
-@app.callback(Output('add_layout', 'children'), Input('push_button', 'n_clicks'), State('add_layout', 'children'))
+@app.callback(Output('add_layout', 'children'), Input('junku_button', 'n_clicks'), State('add_layout', 'children'))
 def update_layout(n_clicks, layout_children):
     append_layout = html.Div([
         dcc.Dropdown(id={'type': 'count_select_drop', 'index': n_clicks},
         options=[{'value': i, 'label': i} for i in cases['Country/Region'].unique()],
         value = cases['Country/Region'].unique()[n_clicks]
         ),
+        dcc.RadioItems(id={'type': 'count_select_radio', 'index': n_clicks},
+        options = [{'value': i, 'label': i} for i in ['Linear', 'Log']],
+        value='Linear'
+        ),
         dcc.Graph(id={'type': 'count_select_graph', 'index': n_clicks})
-    ],style={'width': '50%', 'display': 'inline-block'})
+    ],style={'width': '46%', 'padding': '2%', 'display': 'inline-block'})
     layout_children.append(append_layout)
     return layout_children
 
 @app.callback(
     Output({'type': 'count_select_graph', 'index': MATCH}, 'figure'), 
-    Input({'type': 'count_select_drop', 'index': MATCH}, 'value'))
-def update_country_graph(selected_country):
+    Input({'type': 'count_select_drop', 'index': MATCH}, 'value'),
+    Input({'type': 'count_select_radio', 'index': MATCH}, 'value')
+    )
+def update_country_graph(selected_country, selected_radio_value):
+    if selected_country is None:
+        dash.exceptions.PreventUpdate
     selected_country_data = all_data[all_data['Country/Region'] == selected_country]
-    return px.line(selected_country_data, x='variable', y='value', color='data_type', log_y=True)
-
-
-## コメントを動的に出るようにする
-## 選択した国のデータが全て出るようにする
-
-## その下に国ごとのデータをどんどん追加する
-## 各グラフを色で分ける
+    if selected_radio_value == 'Log':
+        return px.line(selected_country_data, x='variable', y='value', color='data_type', log_y=True)
+    return px.line(selected_country_data, x='variable', y='value', color='data_type',)
 
 
 if __name__ == "__main__":
