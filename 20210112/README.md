@@ -20,12 +20,12 @@
 - ネットワーク可視化入門
 - Dash Cytoscapeによるインタラクティブな可視化
 
+## 資料（随時追加）
+
+- [Plotlyによるインタラクティブな可視化事例](https://junkudo-event-20210112.readthedocs.io/ja/latest/)
+
 ## プレゼント企画
 
 参加者の中から抽選で[pandasクックブック ―Pythonによるデータ処理のレシピ―](http://www.asakura.co.jp/books/isbn/978-4-254-12242-8/)をプレゼント
 
 ![](http://www.asakura.co.jp/goods_img/115751.jpg)
-
-## 資料
-
-- [Plotlyによるインタラクティブな可視化事例](https://junkudo-event-20210112.readthedocs.io/ja/latest/)
