@@ -3,6 +3,8 @@
 - 2021年１月12日: 19:30～21:00
 - Zoomによるオンライン開催
 
+[![](https://www.asakura.co.jp/goods_img/117651.jpg)](https://www.asakura.co.jp/books/isbn/978-4-254-12258-9/)
+
 ## チケット
 
 - [参加券](https://startupmj.stores.jp/items/5fc9d7d2b00aa314711a9300)
@@ -21,6 +23,8 @@
 ## プレゼント企画
 
 参加者の中から抽選で[pandasクックブック ―Pythonによるデータ処理のレシピ―](http://www.asakura.co.jp/books/isbn/978-4-254-12242-8/)をプレゼント
+
+![](http://www.asakura.co.jp/goods_img/115751.jpg)
 
 ## 資料
 
