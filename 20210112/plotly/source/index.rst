@@ -12,6 +12,7 @@ Pythonインタラクティブ・データビジュアライゼーション入�
 
    visualization_example
    callback_example
+   data_cleansing
 
 Indices and tables
 ==================
