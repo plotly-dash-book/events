@@ -54,12 +54,14 @@
         age_by_day_df = age_df.loc[age_df["確定日"] == date].sort_values("感染者数")
         age_prefectures_fig.data[1].values = age_by_day_df["感染者数"]
         age_prefectures_fig.data[1].labels = age_by_day_df["年代"]
+        age_prefectures_fig.layout.annotations[1].text = f"年代別内訳({date:%m/%d})"
 
         prefectures_by_day_df = prefectures_df.loc[
             prefectures_df["確定日"] == date
         ].sort_values("感染者数", ascending=False)
         age_prefectures_fig.data[2].x = prefectures_by_day_df["居住都道府県"]
         age_prefectures_fig.data[2].y = prefectures_by_day_df["感染者数"]
+        age_prefectures_fig.layout.annotations[2].text = f"居住都道府県({date:%m/%d})"
 
 
     age_prefectures_fig.data[0].on_click(update_age_prefectures)
