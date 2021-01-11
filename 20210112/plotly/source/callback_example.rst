@@ -45,23 +45,22 @@
         go.Bar(x=fixed_date_sum_df.index, y=fixed_date_sum_df["感染者数"]), row=1, col=1
     )
     age_prefectures_fig.add_trace(go.Pie(textinfo="label+percent"), row=2, col=1)
-    age_prefectures_fig.add_trace(go.Bar(), row=2, col=2)
+    age_prefectures_fig.add_trace(go.Bar(name="居住都道府県"), row=2, col=2)
 
 
     def update_age_prefectures(trace, points, selector):
-        n = points.point_inds[0]
-        date = age_df.iloc[n, 0]
+        date = points.xs[0]
         age_by_day_df = age_df.loc[age_df["確定日"] == date].sort_values("感染者数")
         age_prefectures_fig.data[1].values = age_by_day_df["感染者数"]
         age_prefectures_fig.data[1].labels = age_by_day_df["年代"]
-        age_prefectures_fig.layout.annotations[1].text = f"年代別内訳({date:%m/%d})"
+        age_prefectures_fig.layout.annotations[1].text = f"年代別内訳({date})"
 
         prefectures_by_day_df = prefectures_df.loc[
             prefectures_df["確定日"] == date
         ].sort_values("感染者数", ascending=False)
         age_prefectures_fig.data[2].x = prefectures_by_day_df["居住都道府県"]
         age_prefectures_fig.data[2].y = prefectures_by_day_df["感染者数"]
-        age_prefectures_fig.layout.annotations[2].text = f"居住都道府県({date:%m/%d})"
+        age_prefectures_fig.layout.annotations[2].text = f"居住都道府県({date})"
 
 
     age_prefectures_fig.data[0].on_click(update_age_prefectures)
@@ -102,11 +101,10 @@
 
     def update_dayofweek(trace, points, selector):
         try:
-            n = points.point_inds[0]
+            date = points.xs[0]
         except IndexError:
             return
-        
-        date = day_df.iloc[n]["確定日"]
+
         dayofweek = day_df.loc[day_df["確定日"] == date].index[0]
         dayofweek_df = day_df.loc[dayofweek]
         day_fig.data[2].x = dayofweek_df["確定日"]
