@@ -1,10 +1,10 @@
 import json
-import os 
+import os
 
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output, State, MATCH 
+from dash.dependencies import Input, Output, State, MATCH
 
 import plotly.express as px
 import pandas as pd
@@ -62,25 +62,25 @@ def mapdata(df):
     return data
 
 
-cases = read_john_data('data/cases.csv')
-death = read_john_data('data/death.csv')
-recovery = read_john_data('data/recovery.csv')
+cases = read_john_data("data/cases.csv")
+death = read_john_data("data/death.csv")
+recovery = read_john_data("data/recovery.csv")
 cases_map = mapdata(cases)
 death_map = mapdata(death)
 recovery_map = mapdata(recovery)
-cases_map['data_type'] = 'cases'
-death_map['data_type'] = 'death'
-recovery_map['data_type'] = 'recovery'
+cases_map["data_type"] = "cases"
+death_map["data_type"] = "death"
+recovery_map["data_type"] = "recovery"
 all_data = pd.concat([cases_map, death_map, recovery_map])
 
-mapbox = 'pk.eyJ1IjoibWF6YXJpbW9ubyIsImEiOiJja2piY2wzM3YxcHJ2MzRtdHFzbXU5d3IwIn0.aPLxSg3qgcJZL3RCvEGc3Q'
+mapbox = "your-token"
 px.set_mapbox_access_token(mapbox)
 
 external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-server = app.server 
+server = app.server
 
 app.layout = html.Div(
     [
@@ -95,7 +95,12 @@ app.layout = html.Div(
                     href="https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_time_series",
                 ),
             ],
-            style={"marginBottom": "2%", 'backgroundColor': '#5feb4d', 'padding': '3%', 'borderRadius': '20px'},
+            style={
+                "marginBottom": "2%",
+                "backgroundColor": "#5feb4d",
+                "padding": "3%",
+                "borderRadius": "20px",
+            },
         ),
         html.Div(
             [
@@ -127,20 +132,40 @@ app.layout = html.Div(
                     ]
                 ),
                 dcc.Graph(id="first_graph"),
-                dcc.Graph(id="map_graph", style={'width': '65%', 'display': 'inline-block'}),
-                dcc.Graph(id="callback_graph", style={'width': '35%', 'display': 'inline-block'}),
+                dcc.Graph(
+                    id="map_graph", style={"width": "65%", "display": "inline-block"}
+                ),
+                dcc.Graph(
+                    id="callback_graph",
+                    style={"width": "35%", "display": "inline-block"},
+                ),
                 html.H1(id="test"),
-            ], style={"marginBottom": "2%", 'backgroundColor': '#5feb4d', 'padding': '3%', 'borderRadius': '20px'}
+            ],
+            style={
+                "marginBottom": "2%",
+                "backgroundColor": "#5feb4d",
+                "padding": "3%",
+                "borderRadius": "20px",
+            },
         ),
-        html.Div([
-            html.Div([
-                html.H3('国ごとのデータ（パターン・マッチング・コールバック）'),
-                html.Button(id='junku_button', children='PUSHME', n_clicks=0),
-                html.Div(id='add_layout', children=[]),
-            ])
-        ], style={'backgroundColor': '#5feb4d', 'padding': '3%', 'borderRadius': '20px'}),
+        # html.Div(
+        #     [
+        #         html.Div(
+        #             [
+        #                 html.H3("国ごとのデータ（パターン・マッチング・コールバック）"),
+        #                 html.Button(id="junku_button", children="PUSHME", n_clicks=0),
+        #                 html.Div(id="add_layout", children=[]),
+        #             ]
+        #         )
+        #     ],
+        #     style={
+        #         "backgroundColor": "#5feb4d",
+        #         "padding": "3%",
+        #         "borderRadius": "20px",
+        #     },
+        # ),
     ],
-    style={"padding": "5%", 'backgroundColor': '#17be06'},
+    style={"padding": "5%", "backgroundColor": "#17be06"},
 )
 
 
@@ -289,42 +314,82 @@ def update_graph(selectedData, selected_value):
         country_list.append(one_dict["hovertext"])
     if selected_value == "死亡者数":
         death_df = death[death["Country/Region"].isin(country_list)]
-        return px.line(death_df, x="variable", y="value", color="Country/Region", title=f'選択国の{selected_value}(累計値: SHIFT+クリック)', height=800)
+        return px.line(
+            death_df,
+            x="variable",
+            y="value",
+            color="Country/Region",
+            title=f"選択国の{selected_value}(累計値: SHIFT+クリック)",
+            height=800,
+        )
     elif selected_value == "回復者数":
         recovery_df = recovery[recovery["Country/Region"].isin(country_list)]
-        return px.line(recovery_df, x="variable", y="value", color="Country/Region", title=f'選択国の{selected_value}(累計値: SHIFT+クリック)', height=800)
+        return px.line(
+            recovery_df,
+            x="variable",
+            y="value",
+            color="Country/Region",
+            title=f"選択国の{selected_value}(累計値: SHIFT+クリック)",
+            height=800,
+        )
     else:
         cases_df = cases[cases["Country/Region"].isin(country_list)]
-        return px.line(cases_df, x="variable", y="value", color="Country/Region", title=f'選択国の{selected_value}(累計値: SHIFT+クリック)', height=800)
+        return px.line(
+            cases_df,
+            x="variable",
+            y="value",
+            color="Country/Region",
+            title=f"選択国の{selected_value}(累計値: SHIFT+クリック)",
+            height=800,
+        )
 
-@app.callback(Output('add_layout', 'children'), Input('junku_button', 'n_clicks'), State('add_layout', 'children'))
-def update_layout(n_clicks, layout_children):
-    append_layout = html.Div([
-        dcc.Dropdown(id={'type': 'count_select_drop', 'index': n_clicks},
-        options=[{'value': i, 'label': i} for i in cases['Country/Region'].unique()],
-        value = cases['Country/Region'].unique()[n_clicks]
-        ),
-        dcc.RadioItems(id={'type': 'count_select_radio', 'index': n_clicks},
-        options = [{'value': i, 'label': i} for i in ['Linear', 'Log']],
-        value='Linear'
-        ),
-        dcc.Graph(id={'type': 'count_select_graph', 'index': n_clicks})
-    ],style={'width': '46%', 'padding': '2%', 'display': 'inline-block'})
-    layout_children.append(append_layout)
-    return layout_children
 
-@app.callback(
-    Output({'type': 'count_select_graph', 'index': MATCH}, 'figure'), 
-    Input({'type': 'count_select_drop', 'index': MATCH}, 'value'),
-    Input({'type': 'count_select_radio', 'index': MATCH}, 'value')
-    )
-def update_country_graph(selected_country, selected_radio_value):
-    if selected_country is None:
-        dash.exceptions.PreventUpdate
-    selected_country_data = all_data[all_data['Country/Region'] == selected_country]
-    if selected_radio_value == 'Log':
-        return px.line(selected_country_data, x='variable', y='value', color='data_type', log_y=True)
-    return px.line(selected_country_data, x='variable', y='value', color='data_type',)
+# @app.callback(
+#     Output("add_layout", "children"),
+#     Input("junku_button", "n_clicks"),
+#     State("add_layout", "children"),
+# )
+# def update_layout(n_clicks, layout_children):
+#     append_layout = html.Div(
+#         [
+#             dcc.Dropdown(
+#                 id={"type": "count_select_drop", "index": n_clicks},
+#                 options=[
+#                     {"value": i, "label": i} for i in cases["Country/Region"].unique()
+#                 ],
+#                 value=cases["Country/Region"].unique()[n_clicks],
+#             ),
+#             dcc.RadioItems(
+#                 id={"type": "count_select_radio", "index": n_clicks},
+#                 options=[{"value": i, "label": i} for i in ["Linear", "Log"]],
+#                 value="Linear",
+#             ),
+#             dcc.Graph(id={"type": "count_select_graph", "index": n_clicks}),
+#         ],
+#         style={"width": "46%", "padding": "2%", "display": "inline-block"},
+#     )
+#     layout_children.append(append_layout)
+#     return layout_children
+
+
+# @app.callback(
+#     Output({"type": "count_select_graph", "index": MATCH}, "figure"),
+#     Input({"type": "count_select_drop", "index": MATCH}, "value"),
+#     Input({"type": "count_select_radio", "index": MATCH}, "value"),
+# )
+# def update_country_graph(selected_country, selected_radio_value):
+#     if selected_country is None:
+#         dash.exceptions.PreventUpdate
+#     selected_country_data = all_data[all_data["Country/Region"] == selected_country]
+#     if selected_radio_value == "Log":
+#         return px.line(
+#             selected_country_data,
+#             x="variable",
+#             y="value",
+#             color="data_type",
+#             log_y=True,
+#         )
+#     return px.line(selected_country_data, x="variable", y="value", color="data_type",)
 
 
 if __name__ == "__main__":
