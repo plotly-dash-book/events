@@ -25,6 +25,8 @@
 - Plotlyによるインタラクティブな可視化事例
   - [スライド](https://hackmd.io/7ponF2QfT7u43CPjSyPtmw?view)
   - [notebook(コード)](https://junkudo-event-20210112.readthedocs.io/ja/latest/)
+- Dash Cytoscapeで始めるネットワーク可視化
+  - [スライド](https://speakerdeck.com/komofr/plotly-dash-book)
 
 ## プレゼント企画
 
