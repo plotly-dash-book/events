@@ -9,4 +9,5 @@
     - [アプリケーションコード](https://github.com/plotly-dash-book/events/blob/main/20210112/dash/application/app.py)
 - [市町村人口予想 可視化アプリケーション](https://chomoku.herokuapp.com/pyramid)
     - [アプリケーションコード](https://github.com/mazarimono/jinko-pyramid/blob/main/app.py)
+    - [アプリケーション解説記事](https://qiita.com/OgawaHideyuki/items/0123c3a7821a59cfa8c9)
 
