@@ -22,7 +22,9 @@
 
 ## 資料（随時追加）
 
-- [Plotlyによるインタラクティブな可視化事例](https://junkudo-event-20210112.readthedocs.io/ja/latest/)
+- Plotlyによるインタラクティブな可視化事例
+  - [スライド](https://hackmd.io/7ponF2QfT7u43CPjSyPtmw?view)
+  - [notebook(コード)](https://junkudo-event-20210112.readthedocs.io/ja/latest/)
 
 ## プレゼント企画
 
